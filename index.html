@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Codex 协作 Cookbook：场景索引版</title>
+  <style>
+    :root {
+      --bg: #F8F9FA;
+      --text: #334155;
+      --heading: #1E293B;
+      --muted: #64748B;
+      --line: #E2E8F0;
+      --soft: #F1F5F9;
+      --blue: #2563EB;
+      --blue-dark: #1E40AF;
+      --blue-soft: #EFF6FF;
+      --green: #0F766E;
+      --orange: #B45309;
+      --red: #B42318;
+      --white: #FFFFFF;
+      --shadow: 0 10px 28px rgba(15, 23, 42, 0.08);
+      --serif: "Noto Serif SC", "Songti SC", STSong, SimSun, serif;
+      --sans: "Noto Sans SC", -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+      --mono: Consolas, "SFMono-Regular", Menlo, Monaco, "Liberation Mono", monospace;
+    }
+
+    * { box-sizing: border-box; }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      margin: 0;
+      font-family: var(--sans);
+      background-color: var(--bg);
+      color: var(--text);
+      line-height: 1.75;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; text-decoration: none; }
+    button, input { font: inherit; }
+
+    .layout {
+      min-height: 100vh;
+      display: flex;
+    }
+
+    .mobile-header {
+      display: none;
+      position: sticky;
+      top: 0;
+      z-index: 60;
+      background: rgba(255, 255, 255, 0.86);
+      backdrop-filter: blur(14px);
+      border-bottom: 1px solid var(--line);
+      padding: 12px 16px;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: 0 4px 14px rgba(15, 23, 42, 0.06);
+    }
+
+    .mobile-title {
+      font-weight: 800;
+      color: var(--heading);
+      font-size: 18px;
+    }
+
+    .mobile-menu-button {
+      border: 1px solid var(--line);
+      background: var(--white);
+      border-radius: 10px;
+      padding: 6px 10px;
+      color: var(--heading);
+      cursor: pointer;
+    }
+
+    .sidebar {
+      width: 280px;
+      height: 100vh;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      background: var(--white);
+      border-right: 1px solid var(--line);
+      box-shadow: 2px 0 14px rgba(15, 23, 42, 0.03);
+      overflow-y: auto;
+      z-index: 50;
+    }
+
+    .sidebar-inner { padding: 24px 18px; }
+
+    .brand {
+      margin-bottom: 26px;
+      padding: 0 8px;
+    }
+
+    .brand h1 {
+      margin: 0;
+      color: var(--heading);
+      font-size: 24px;
+      line-height: 1.2;
+      letter-spacing: -0.03em;
+    }
+
+    .brand p {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .search-box {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 10px 12px;
+      margin-bottom: 18px;
+      color: var(--text);
+      background: var(--white);
+      outline: none;
+    }
+
+    .search-box:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px var(--blue-soft);
+    }
+
+    .nav-group-title {
+      margin: 18px 8px 8px;
+      color: var(--muted);
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+    }
+
+    .nav {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .nav-link {
+      display: block;
+      border-left: 3px solid transparent;
+      border-radius: 8px;
+      padding: 9px 12px;
+      color: #475569;
+      font-weight: 600;
+      transition: all 0.18s ease-in-out;
+      cursor: pointer;
+    }
+
+    .nav-link small {
+      display: block;
+      margin-top: 2px;
+      color: #94A3B8;
+      font-weight: 500;
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .nav-link:hover,
+    .nav-link.active {
+      color: var(--blue);
+      background: var(--blue-soft);
+      border-left-color: var(--blue);
+    }
+
+    .nav-link.hidden-by-search { display: none; }
+
+    .main {
+      flex: 1;
+      min-width: 0;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 32px 28px 56px;
+    }
+
+    .content-section {
+      display: none;
+      max-width: 920px;
+      margin: 0 auto;
+      animation: fadeIn 0.2s ease-out;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hero-section {
+      min-height: calc(100vh - 88px);
+      display: flex;
+      align-items: center;
+    }
+
+    .hero-card {
+      width: 100%;
+      text-align: center;
+    }
+
+    .eyebrow {
+      display: inline-block;
+      color: var(--blue);
+      background: var(--blue-soft);
+      border: 1px solid #DBEAFE;
+      border-radius: 999px;
+      padding: 6px 12px;
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 0.05em;
+      margin-bottom: 18px;
+    }
+
+    h2 {
+      margin: 0 0 10px;
+      color: var(--heading);
+      font-size: 34px;
+      line-height: 1.22;
+      letter-spacing: -0.03em;
+    }
+
+    .hero-card h2 {
+      font-size: clamp(38px, 6vw, 64px);
+      line-height: 1.08;
+      margin-bottom: 16px;
+    }
+
+    .subtitle {
+      margin: 0 auto 30px;
+      max-width: 760px;
+      color: var(--blue);
+      font-size: 22px;
+      font-weight: 500;
+    }
+
+    .lead {
+      color: var(--muted);
+      font-size: 17px;
+      max-width: 820px;
+      margin: 0 auto 18px;
+      text-align: left;
+    }
+
+    .quote-box {
+      margin: 34px auto;
+      max-width: 800px;
+      background: var(--white);
+      border-left: 4px solid var(--blue);
+      border-radius: 0 12px 12px 0;
+      box-shadow: var(--shadow);
+      padding: 22px 26px;
+      text-align: left;
+    }
+
+    .quote-box p {
+      margin: 0;
+      font-family: var(--serif);
+      font-size: 21px;
+      color: #475569;
+      line-height: 1.7;
+    }
+
+    .quote-box .byline {
+      margin-top: 14px;
+      text-align: right;
+      color: var(--muted);
+      font-weight: 700;
+      font-family: var(--sans);
+      font-size: 14px;
+    }
+
+    .section-title {
+      text-align: center;
+      margin-bottom: 28px;
+    }
+
+    .section-title p {
+      margin: 8px auto 0;
+      color: var(--blue);
+      font-size: 20px;
+      max-width: 760px;
+    }
+
+    .card {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      padding: 24px;
+      margin: 18px 0;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .grid-3 {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    .mini-card {
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 18px;
+      box-shadow: 0 6px 20px rgba(15, 23, 42, 0.045);
+    }
+
+    .mini-card h3,
+    .card h3 {
+      margin: 0 0 8px;
+      color: #334155;
+      font-size: 19px;
+      line-height: 1.35;
+    }
+
+    .mini-card p,
+    .card p {
+      margin: 0;
+      color: var(--muted);
+    }
+
+    .label {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
+      color: var(--heading);
+      font-weight: 800;
+    }
+
+    .label.good { color: var(--green); }
+    .label.warn { color: var(--orange); }
+    .label.danger { color: var(--red); }
+
+    ul, ol { padding-left: 1.25rem; }
+    li { margin: 0.25rem 0; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 18px 0;
+      table-layout: fixed;
+      background: var(--white);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    th, td {
+      border: 1px solid var(--line);
+      padding: 12px;
+      text-align: left;
+      vertical-align: top;
+      word-wrap: break-word;
+    }
+
+    th {
+      background: var(--soft);
+      color: #475569;
+      font-weight: 800;
+    }
+
+    tbody tr:nth-child(odd) { background: #F8FAFC; }
+
+    .scenario-table button {
+      border: 1px solid #BFDBFE;
+      background: var(--blue-soft);
+      color: var(--blue-dark);
+      border-radius: 8px;
+      padding: 6px 10px;
+      cursor: pointer;
+      font-weight: 700;
+      transition: 0.18s ease;
+    }
+
+    .scenario-table button:hover {
+      background: #DBEAFE;
+      transform: translateY(-1px);
+    }
+
+    .tag-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin: 12px 0 0;
+    }
+
+    .tag {
+      display: inline-block;
+      color: var(--blue-dark);
+      background: var(--blue-soft);
+      border: 1px solid #DBEAFE;
+      border-radius: 999px;
+      padding: 3px 9px;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .recipe-meta {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 14px;
+      margin-top: 22px;
+    }
+
+    .recipe-meta .box {
+      background: #FFFFFF;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    .code-toggle {
+      cursor: pointer;
+      user-select: none;
+      background: var(--soft);
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 12px 14px;
+      color: #334155;
+      font-weight: 800;
+      transition: 0.18s ease;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .code-toggle:hover { background: #E2E8F0; }
+
+    .prompt-panel {
+      display: none;
+      margin-top: 10px;
+      border-radius: 10px;
+      overflow: hidden;
+      border: 1px solid #0F172A;
+      background: #111827;
+    }
+
+    .prompt-panel.open { display: block; }
+
+    .prompt-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 12px;
+      background: rgba(255, 255, 255, 0.07);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      color: #CBD5E1;
+      font-size: 13px;
+    }
+
+    .copy-btn {
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.08);
+      color: white;
+      border-radius: 999px;
+      padding: 5px 10px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 700;
+    }
+
+    .copy-btn:hover { background: rgba(255, 255, 255, 0.16); }
+
+    pre {
+      margin: 0;
+      padding: 18px;
+      overflow-x: auto;
+      white-space: pre-wrap;
+      word-break: break-word;
+      color: #E5E7EB;
+      font-family: var(--mono);
+      font-size: 13px;
+      line-height: 1.7;
+      text-shadow: none;
+    }
+
+    .inline-code {
+      background: #DBEAFE;
+      color: var(--blue-dark);
+      padding: 0.12rem 0.35rem;
+      border-radius: 0.25rem;
+      font-family: var(--mono);
+      font-size: 0.92em;
+    }
+
+    .page-nav {
+      margin-top: 40px;
+      padding-top: 24px;
+      border-top: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      gap: 14px;
+    }
+
+    .page-nav-btn,
+    .page-nav-disabled {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      border-radius: 10px;
+      padding: 8px 14px;
+      font-weight: 800;
+    }
+
+    .page-nav-btn {
+      background: #E2E8F0;
+      color: #334155;
+      transition: 0.18s ease;
+      cursor: pointer;
+    }
+
+    .page-nav-btn:hover { background: #CBD5E1; }
+
+    .page-nav-disabled {
+      background: #F1F5F9;
+      color: #CBD5E1;
+      cursor: not-allowed;
+    }
+
+    .checklist {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .check-item {
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+      background: var(--white);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 13px 14px;
+      box-shadow: 0 6px 18px rgba(15, 23, 42, 0.04);
+    }
+
+    .check-item input {
+      margin-top: 6px;
+      accent-color: var(--blue);
+    }
+
+    .toast {
+      position: fixed;
+      left: 50%;
+      bottom: 22px;
+      transform: translateX(-50%) translateY(20px);
+      opacity: 0;
+      pointer-events: none;
+      background: #0F172A;
+      color: white;
+      border-radius: 999px;
+      padding: 10px 16px;
+      box-shadow: var(--shadow);
+      transition: 0.22s ease;
+      z-index: 100;
+      font-weight: 700;
+    }
+
+    .toast.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    footer {
+      margin-top: 40px;
+      border-top: 1px solid var(--line);
+      padding: 24px 0 0;
+      text-align: center;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    footer a {
+      color: var(--blue);
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    footer a:hover {
+      text-decoration: underline;
+    }
+
+    .no-result {
+      display: none;
+      margin-top: 12px;
+      color: var(--muted);
+      padding: 12px;
+      border: 1px dashed var(--line);
+      border-radius: 10px;
+      background: #F8FAFC;
+    }
+
+    @media (max-width: 900px) {
+      .mobile-header { display: flex; }
+      .layout { display: block; }
+      .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        transform: translateX(-100%);
+        transition: transform 0.25s ease;
+      }
+      .sidebar.open { transform: translateX(0); }
+      .main {
+        height: auto;
+        min-height: calc(100vh - 56px);
+        overflow: visible;
+        padding: 22px 16px 42px;
+      }
+      .hero-section { min-height: auto; padding-top: 34px; }
+      .grid-2, .grid-3, .recipe-meta, .checklist { grid-template-columns: 1fr; }
+      table { table-layout: auto; min-width: 680px; }
+      .table-wrap { overflow-x: auto; }
+      .page-nav { flex-direction: column; }
+      h2 { font-size: 29px; }
+      .subtitle { font-size: 19px; }
+    }
+
+    @media print {
+      body { background: white; }
+      .mobile-header, .sidebar, .page-nav, .code-toggle, .toast { display: none !important; }
+      .layout { display: block; }
+      .main { height: auto; overflow: visible; padding: 0; }
+      .content-section { display: block !important; max-width: none; break-after: page; }
+      .prompt-panel { display: block !important; border-color: #999; background: #F8FAFC; }
+      .prompt-head { color: #111; background: #E5E7EB; border-bottom: 1px solid #999; }
+      pre { color: #111; }
+      .card, .mini-card, .recipe-meta .box, table { box-shadow: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="mobile-header">
+    <div class="mobile-title">Codex Cookbook</div>
+    <button class="mobile-menu-button" id="mobileMenuButton">☰</button>
+  </div>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-inner">
+        <div class="brand">
+          <h1>Codex Cookbook</h1>
+          <p>场景索引 · 可复制提示词 · 验收闭环</p>
+        </div>
+        <input id="searchInput" class="search-box" placeholder="搜索：bug、验收、止血、技术债……" />
+        <div id="noResult" class="no-result">没有匹配的章节。</div>
+        <div class="nav-group-title">基础</div>
+        <nav class="nav" id="baseNav">
+          <a href="#intro" class="nav-link">快速开始<small>这份 Codex 协作手册怎么用</small></a>
+          <a href="#standard" class="nav-link">协作原则<small>边界、信息、文档与验证</small></a>
+          <a href="#index" class="nav-link">场景索引<small>从当前局面进入菜谱</small></a>
+        </nav>
+        <div class="nav-group-title">菜谱</div>
+        <nav class="nav" id="recipeNav"></nav>
+        <div class="nav-group-title">收口</div>
+        <nav class="nav" id="endNav">
+          <a href="#combo" class="nav-link">组合菜谱<small>把多个菜谱串成工作流</small></a>
+          <a href="#checklist" class="nav-link">最终检查清单<small>交给 Codex 前的自查</small></a>
+        </nav>
+      </div>
+    </aside>
+
+    <main class="main" id="mainContent">
+      <section id="intro" class="content-section hero-section">
+        <div class="hero-card">
+          <div class="eyebrow">Codex Collaboration Cookbook</div>
+          <h2>Codex 协作 Cookbook</h2>
+          <p class="subtitle">面向真实工程任务的场景化协作手册：先判断局面，再复制菜谱，最后用验收闭环收口。</p>
+          <p class="lead">这份手册不是介绍“什么是好的 cookbook”，而是直接服务于你和 Codex 的协作过程。它把常见开发局面拆成可取用的菜谱：需求不清时怎么诊断，方案没定时怎么收敛，目标明确时怎么直接推进，修 bug 时怎么先复现，连续失败时怎么复盘换路，临近完成时怎么验收。</p>
+          <p class="lead">使用方式很简单：先在左侧找到你当前的场景，再进入对应菜谱。每个菜谱都包含适用场景、不适用场景、输入清单、可复制提示词、执行步骤、验收标准和常见误用。你不需要从头读完，只需要按场景取用。</p>
+          <div class="quote-box">
+            <p>和 Codex 协作的关键，不是写一个神奇提示词，而是把任务放进正确的工作流。</p>
+            <div class="byline">目标 → 模式 → 约束 → 输出 → 验证</div>
+          </div>
+          <div class="page-nav">
+            <span class="page-nav-disabled">← 上一节：无</span>
+            <a href="#standard" class="page-nav-btn" data-target="standard">下一节：协作原则 →</a>
+          </div>
+        </div>
+      </section>
+
+      <section id="standard" class="content-section">
+        <div class="section-title">
+          <h2>Codex 协作原则</h2>
+          <p>先把协作方式定好，再让 Codex 进入具体任务。</p>
+        </div>
+        <div class="grid-2">
+          <div class="mini-card"><h3>1. 以边界换聚焦</h3><p>明确这次做什么、不做什么、什么可妥协、什么不能妥协。边界越清楚，Codex 越不容易顺手扩散。</p></div>
+          <div class="mini-card"><h3>2. 以信息换准确</h3><p>目标、背景、约束、错误现象、相关文件和验收方式越明确，返工越少。</p></div>
+          <div class="mini-card"><h3>3. 以文档换稳定</h3><p>跨多轮任务不要只靠对话记忆。目标、方案、决策、进度、风险都应该沉淀为可更新记录。</p></div>
+          <div class="mini-card"><h3>4. 以验证换可信</h3><p>不要停在“已经改了”。要用测试、最小复现、人工验收步骤或对比结果证明有效。</p></div>
+          <div class="mini-card"><h3>5. 先定模式，再给任务</h3><p>同一个问题可以是诊断、计划、执行、复现、验收或复盘。模式不同，提示词结构也不同。</p></div>
+          <div class="mini-card"><h3>6. 长期建设与短期止血分开</h3><p>长期模块优先可维护；线上应急优先恢复可用。不要把止血方案默认为最终方案。</p></div>
+          <div class="mini-card"><h3>7. 技术债先判断是否阻塞</h3><p>阻塞当前正确性就处理；不阻塞就挂账，避免旁路治理吞掉主线任务。</p></div>
+          <div class="mini-card"><h3>8. 兜底方案必须显性化</h3><p>临时解要说明正解、风险、局限和回收方式。不要让硬编码、吞错、绕过测试伪装成完成。</p></div>
+        </div>
+        <div class="card">
+          <h3>通用任务骨架</h3>
+          <div class="code-toggle" data-toggle="general-prompt">
+            <span>查看通用骨架</span><span>▶</span>
+          </div>
+          <div class="prompt-panel" id="general-prompt">
+            <div class="prompt-head">
+              <span>适合大多数 Codex 任务的起手式</span>
+              <button class="copy-btn" data-copy-general="true">复制骨架</button>
+            </div>
+            <pre>目标：解决【具体问题】，尽量逼近【目标状态】。
+模式：【先诊断 / 先计划 / 直接推进 / 先复现 / 先验收 / 先复盘】。
+约束：这次只处理【当前范围】，不扩展到【排除范围】；优先【长期可维护 / 短期可用 / 最小改动 / 风险最低】。
+输出：请给出【判断 / 方案 / 修改 / 测试 / 文档 / 决策记录】。
+验证：通过【测试、最小复现、人工验收标准、日志、截图、对比结果】证明有效。
+如果需要我确认，只集中提出最关键的 1 到 3 个问题，并按“问题、选项、利弊、推荐”格式给出。</pre>
+          </div>
+        </div>
+        <div class="page-nav">
+          <a href="#intro" class="page-nav-btn" data-target="intro">← 上一节：快速开始</a>
+          <a href="#index" class="page-nav-btn" data-target="index">下一节：场景索引 →</a>
+        </div>
+      </section>
+
+      <section id="index" class="content-section">
+        <div class="section-title">
+          <h2>场景索引</h2>
+          <p>先判断当前局面，再进入对应菜谱。</p>
+        </div>
+        <div class="table-wrap">
+          <table class="scenario-table" id="scenarioTable">
+            <thead>
+              <tr><th>当前局面</th><th>推荐菜谱</th><th>主要目标</th></tr>
+            </thead>
+            <tbody id="scenarioRows"></tbody>
+          </table>
+        </div>
+        <div class="card">
+          <h3>最小闭环</h3>
+          <p>任何任务都可以先压缩成五个字段：<span class="inline-code">目标</span>、<span class="inline-code">模式</span>、<span class="inline-code">约束</span>、<span class="inline-code">输出</span>、<span class="inline-code">验证</span>。如果这五个字段说不清，直接开工往往会增加返工。</p>
+        </div>
+        <div class="page-nav">
+          <a href="#standard" class="page-nav-btn" data-target="standard">← 上一节：协作原则</a>
+          <a href="#recipe-1" class="page-nav-btn" data-target="recipe-1">下一节：模糊局面诊断 →</a>
+        </div>
+      </section>
+
+      <div id="recipeSections"></div>
+
+      <section id="combo" class="content-section">
+        <div class="section-title">
+          <h2>组合菜谱</h2>
+          <p>真实任务往往是多个菜谱的串联，而不是一个万能提示词。</p>
+        </div>
+        <div class="grid-2">
+          <div class="mini-card"><h3>方案讨论型</h3><p>用“方案收敛与决策”先定义问题、比较候选方案、输出推荐路径，再进入直接推进。</p></div>
+          <div class="mini-card"><h3>直接开发型</h3><p>用“主线清晰直接推进”限制范围、减少非关键确认，最后接“验收闭环”。</p></div>
+          <div class="mini-card"><h3>Bug 修复型</h3><p>用“先复现再修复”稳定复现问题，修复后进入“验收闭环”，旁路问题进入“技术债挂账”。</p></div>
+          <div class="mini-card"><h3>中型项目型</h3><p>先“方案收敛”，再“长期建设分阶段推进”，全程用“多轮协作文档化”维护状态。</p></div>
+        </div>
+        <div class="card">
+          <h3>推荐组合路径</h3>
+          <ol>
+            <li>问题不清：模糊局面诊断 → 方案收敛与决策 → 主线清晰直接推进 → 验收闭环。</li>
+            <li>修 bug：Bug 修复 → 验收闭环 → 技术债挂账。</li>
+            <li>连续失败：失败复盘与换路 → 方案收敛与决策 → 设置失败停点。</li>
+            <li>中型项目：长期建设分阶段推进 → 多轮协作文档化 → 阶段验收闭环。</li>
+          </ol>
+        </div>
+        <div class="page-nav">
+          <a href="#recipe-11" class="page-nav-btn" data-target="recipe-11">← 上一节：兜底方案审批</a>
+          <a href="#checklist" class="page-nav-btn" data-target="checklist">下一节：最终检查清单 →</a>
+        </div>
+      </section>
+
+      <section id="checklist" class="content-section">
+        <div class="section-title">
+          <h2>最终检查清单</h2>
+          <p>交给 Codex 前先检查；如果缺 3 项以上，先补任务定义。</p>
+        </div>
+        <div class="checklist" id="checklistBox"></div>
+        <div class="card">
+          <h3>一句话原则</h3>
+          <p>先判断局面，再选择菜谱；先限定边界，再要求输出；先形成结果，再补验证；先记录共识，再跨轮推进。</p>
+        </div>
+        <div class="page-nav">
+          <a href="#combo" class="page-nav-btn" data-target="combo">← 上一节：组合菜谱</a>
+          <span class="page-nav-disabled">下一节：无 →</span>
+        </div>
+      </section>
+
+      <footer>Codex 协作 Cookbook by <a href="https://github.com/droggeljugLM" target="_blank" rel="noopener noreferrer">droggeljug</a></footer>
+    </main>
+  </div>
+
+  <div class="toast" id="toast">已复制</div>
+
+  <script>
+    const recipes = [
+      {
+        id: 1,
+        title: "模糊局面诊断",
+        scenario: "我还不确定问题在哪里",
+        goal: "先找问题、排序、提出处理方向，而不是立刻修改。",
+        tags: ["诊断", "需求不清", "优先级"],
+        useWhen: ["代码、UI、方案或文档不太对，但问题尚未明确", "想先让 Codex 找问题并排序", "需要先补关键假设和缺失信息"],
+        avoidWhen: ["已经知道要改哪里", "线上故障需要立刻止血", "任务只是明确执行"],
+        inputs: ["当前材料", "目标方向", "重点维度", "限制条件"],
+        prompt: `先不要急着修改。请基于我提供的【当前材料】，从【指定维度】系统诊断问题。
+
+要求：
+1. 先列出你的关键假设和缺失信息。
+2. 区分“明确问题”和“可能风险”。
+3. 按优先级排序，说明为什么优先。
+4. 对每个问题给出推荐处理方向。
+5. 最后指出如果要进入下一步实施，还需要我补充哪 1 到 3 个最关键的信息。
+
+当前材料：
+【粘贴材料】
+
+指定维度：
+【功能 / 代码结构 / 交互体验 / 性能 / 安全 / 文档 / 测试】`,
+        steps: ["先诊断，不直接修改", "把问题按优先级排序", "选择最高优先级的 1 到 3 项进入下一轮", "如果输出太散，要求按必须改、建议改、可不改重排"],
+        acceptance: ["知道最重要的问题是什么", "每个问题有原因、影响和建议方向", "下一步动作明确"],
+        anti: ["只说“帮我看看有什么问题”", "不限定诊断维度", "诊断后直接让它全部修改"],
+        extra: "如果某个问题不是当前阶段必须处理，请标为“暂不处理”，并说明原因。"
+      },
+      {
+        id: 2,
+        title: "方案收敛与决策",
+        scenario: "我知道目标，但方案没定",
+        goal: "比较路径、明确取舍、形成推荐方案。",
+        tags: ["方案", "决策", "架构"],
+        useWhen: ["目标大致明确，但路径不唯一", "需要比较方案", "希望先把边界和风险说清楚"],
+        avoidWhen: ["任务很小，直接改更快", "问题已经定位清楚，无需大方案比较"],
+        inputs: ["目标", "候选方案", "约束", "偏好"],
+        prompt: `先不要写代码。请把这个任务做成方案收敛。
+
+目标：
+【目标】
+
+约束：
+【约束】
+
+请输出：
+1. 问题重新定义：这件事真正要解决的核心矛盾是什么。
+2. 可选方案：至少给出 2 到 3 个方案。
+3. 对比表：从实现成本、风险、可维护性、扩展性、验证难度比较。
+4. 推荐方案：明确推荐一个，并说明为什么。
+5. 不推荐方案：说明哪些方案不建议采用，以及原因。
+6. 执行计划：如果采用推荐方案，分几步推进。
+7. 验收标准：如何判断这个方案完成。
+
+如果必须我拍板，请只提出最关键的 1 到 3 个决策点。`,
+        steps: ["重新定义问题", "列候选方案", "按标准比较", "选择推荐路径", "确认后进入执行"],
+        acceptance: ["方案有清楚利弊比较", "推荐路径能解释为什么更优", "执行步骤和验证方式明确"],
+        anti: ["列很多方案但没有决策标准", "拖成空泛架构争论", "没有不做项"],
+        extra: "请把“必须现在决定的问题”和“可以实施中再决定的问题”分开。"
+      },
+      {
+        id: 3,
+        title: "主线清晰直接推进",
+        scenario: "我知道要改什么，希望它直接做",
+        goal: "减少过程噪音，直接逼近最终可用状态。",
+        tags: ["执行", "开发", "少确认"],
+        useWhen: ["目标明确", "范围明确", "当前任务是执行而不是探索"],
+        avoidWhen: ["需求仍然模糊", "影响多个模块但边界未定", "不能接受 Codex 自行做小决策"],
+        inputs: ["任务目标", "相关文件或模块", "不做范围", "完成标准"],
+        prompt: `请直接按逼近最终可用状态推进。
+
+目标：
+【目标】
+
+范围：
+这次只处理【范围 A】，不扩展到【范围 B】。
+
+执行要求：
+1. 先读相关上下文，再动手。
+2. 能自行判断的小问题直接拍板推进。
+3. 不要频繁打断我确认非关键细节。
+4. 如果遇到必须我决定的问题，最后集中列出，最多 1 到 3 个，并给出你的推荐。
+5. 改完后说明改了什么、为什么这样改、如何验证。
+
+验收方式：
+【验收方式】`,
+        steps: ["给足上下文和边界", "明确不顺手扩展", "执行修改", "补验证闭环"],
+        acceptance: ["改动集中在当前范围", "目标行为已实现", "没有无关重构", "有验证结果"],
+        anti: ["范围没说清就要求直接推进", "只说目标不说验收", "把重大决策交给 Codex 猜"],
+        extra: "这次只解决当前核心问题，不顺手扩展、不做无关重构。"
+      },
+      {
+        id: 4,
+        title: "Bug 修复：先复现，再修复",
+        scenario: "我在修 bug",
+        goal: "稳定复现、定位根因、最小修复、防止回归。",
+        tags: ["Bug", "复现", "测试"],
+        useWhen: ["有明确 bug 现象", "不希望盲改", "希望修复后防回归"],
+        avoidWhen: ["没有稳定现象", "问题属于方案不清而不是 bug"],
+        inputs: ["问题现象", "预期行为", "实际行为", "复现条件", "相关范围"],
+        prompt: `请按“先复现，再修复，再回归”的方式处理这个 bug。
+
+问题现象：
+【问题现象】
+
+预期行为：
+【预期行为】
+
+实际行为：
+【实际行为】
+
+要求：
+1. 先不要直接改代码。
+2. 优先补一个最小失败测试来稳定复现这个 bug。
+3. 如果不适合写自动化测试，请给出最小可行复现步骤和验证方法。
+4. 确认问题可以复现后，再定位根因并修改。
+5. 修复后运行相关测试，并说明是否存在回归风险。
+6. 不要为了让测试通过而绕开真实问题。`,
+        steps: ["固定复现方式", "写失败测试或最小复现", "定位根因", "最小化修改", "运行回归测试"],
+        acceptance: ["修复前能稳定复现", "修复后同一路径不再失败", "关键回归通过", "根因解释清楚"],
+        anti: ["没有复现就直接改", "测试写得过宽", "只验证 happy path"],
+        extra: "请把“根因修复”和“防御性兜底”分开说明。"
+      },
+      {
+        id: 5,
+        title: "长期建设分阶段推进",
+        scenario: "我做的是长期模块或中型项目",
+        goal: "分阶段交付，不用短期通过牺牲长期结构。",
+        tags: ["长期", "模块", "分阶段"],
+        useWhen: ["任务会持续演进", "做的是模块或系统能力", "关心维护性和扩展性"],
+        avoidWhen: ["一次性脚本", "临时原型", "线上事故止血"],
+        inputs: ["长期目标", "当前阶段目标", "长期约束", "短期交付"],
+        prompt: `这个任务按长期建设处理，不要为了短期通过牺牲可维护性、健壮性和扩展性。
+
+长期目标：
+【长期目标】
+
+当前阶段目标：
+【阶段目标】
+
+约束：
+【约束】
+
+请输出：
+1. 当前阶段应该做到什么，不应该做到什么。
+2. 推荐的分阶段路线。
+3. 本阶段最小可交付范围。
+4. 需要沉淀的文档、接口或测试。
+5. 哪些短期方案不建议采用，原因是什么。
+6. 如果必须临时妥协，请明确风险、回收方式和后续治理点。`,
+        steps: ["确定长期目标和阶段目标", "切出最小可交付范围", "明确接口、文档、测试和风险", "阶段结束做验收"],
+        acceptance: ["阶段目标清楚且不过度膨胀", "当前实现不阻碍后续演进", "文档接口测试覆盖核心路径", "临时妥协被记录"],
+        anti: ["借长期建设过度设计", "没有阶段交付", "只谈架构不验证"],
+        extra: "如果存在过度设计风险，请主动指出并收缩范围。"
+      },
+      {
+        id: 6,
+        title: "短期止血",
+        scenario: "我现在只想先恢复可用",
+        goal: "优先恢复关键路径，控制影响面。",
+        tags: ["止血", "应急", "恢复"],
+        useWhen: ["线上问题需要先恢复", "控制影响面比彻底治理更重要", "可以接受阶段性技术债"],
+        avoidWhen: ["当前不是紧急问题", "长期可维护性更重要", "无法接受临时方案"],
+        inputs: ["故障现象", "影响范围", "恢复目标", "禁止动作", "后续治理"],
+        prompt: `这次以短期止血为主，优先恢复可用和控制影响面，不追求一次性彻底治理。
+
+故障现象：
+【故障现象】
+
+恢复目标：
+【恢复目标】
+
+限制：
+【限制】
+
+要求：
+1. 先判断最小止血路径。
+2. 不做无关重构。
+3. 如果使用临时方案，必须标注风险、局限和后续回收方式。
+4. 止血后给出最小验证步骤。
+5. 最后列出后续长期治理项。`,
+        steps: ["恢复关键路径", "控制改动范围", "标注临时方案风险", "做最小验证", "建立治理清单"],
+        acceptance: ["核心功能恢复", "影响面未扩大", "临时方案风险明确", "后续治理项明确"],
+        anti: ["把止血当最终方案", "绕过关键安全或数据一致性检查", "没有回收方式"],
+        extra: "请把“现在必须做的止血动作”和“之后应该做的根因治理”分开。"
+      },
+      {
+        id: 7,
+        title: "多轮协作文档化",
+        scenario: "任务会跨多轮对话",
+        goal: "把目标、决策、风险和进度外化，避免上下文丢失。",
+        tags: ["文档", "多轮", "状态"],
+        useWhen: ["任务跨多轮", "目标和决策开始复杂", "担心上下文压缩或遗忘"],
+        avoidWhen: ["一次性小任务", "没有持续推进必要"],
+        inputs: ["当前目标", "已完成内容", "已确认决策", "待决问题", "下一步"],
+        prompt: `这件事会跨多轮推进。请先把当前状态整理成一份协作文档，后续持续更新，不要只依赖会话上下文。
+
+文档至少包括：
+1. 当前目标。
+2. 范围边界和不做项。
+3. 已完成内容。
+4. 已确认决策。
+5. 待决问题。
+6. 当前风险。
+7. 下一步计划。
+8. 验收标准。
+
+后续每完成一个关键阶段，请同步更新这份文档。`,
+        steps: ["建立状态文档", "每轮开始前读文档", "关键决策写入文档", "阶段完成后更新进度和风险"],
+        acceptance: ["能从文档恢复任务状态", "决策不依赖记忆", "下一步动作明确"],
+        anti: ["写成流水账", "文档不更新", "只记录结论不记录原因和风险"],
+        extra: "请写成后续可以直接接着执行的任务状态，而不是总结性文章。"
+      },
+      {
+        id: 8,
+        title: "技术债挂账",
+        scenario: "主线中发现技术债",
+        goal: "不让旁路问题吞掉主线，同时不遗忘风险。",
+        tags: ["技术债", "主线", "风险"],
+        useWhen: ["主线任务中发现旧代码问题", "问题值得记录但不一定现在处理", "不希望顺手优化偏离主线"],
+        avoidWhen: ["技术债阻塞当前正确性", "当前任务本身就是技术债治理", "存在严重安全或数据风险"],
+        inputs: ["当前主任务", "发现的问题", "位置", "是否阻塞"],
+        prompt: `如果在推进主任务过程中发现技术债，先不要立刻切进去治理。
+
+请先判断它是否阻塞当前任务的正确性、稳定性或最小可交付结果：
+1. 如果阻塞，请说明为什么必须现在处理，再给出最小处理方案。
+2. 如果不阻塞，请记录到技术债清单，不要偏离主线。
+
+技术债记录格式：
+- 位置：
+- 问题表现：
+- 当前不处理的原因：
+- 潜在风险：
+- 后续建议：
+- 触发处理条件：
+- 建议处理时机：
+
+记录后继续推进当前主任务。`,
+        steps: ["判断是否阻塞", "阻塞则最小处理", "不阻塞则登记", "主任务结束后回看债务清单"],
+        acceptance: ["主线没有被无关治理打断", "债务记录可执行", "阻塞问题没有被错误挂账"],
+        anti: ["把所有问题都挂账", "债务记录没有位置和触发条件", "技术债治理反客为主"],
+        extra: "如果当前结构正在把主线带向错误方向，请停止执行并说明为什么不能继续挂账。"
+      },
+      {
+        id: 9,
+        title: "失败复盘与换路",
+        scenario: "已经连续失败",
+        goal: "停止机械重复，判断继续、换路、收口还是暂停。",
+        tags: ["复盘", "失败", "换路"],
+        useWhen: ["同一问题连续失败", "当前方向可能不对", "需要判断投入产出"],
+        avoidWhen: ["只是第一次失败", "问题明确，只是执行细节没修好"],
+        inputs: ["原目标", "已经尝试", "失败表现", "当前怀疑"],
+        prompt: `这件事已经连续失败多次。请先不要继续沿当前路径推进。
+
+请做一次失败复盘：
+1. 原目标是否仍然正确。
+2. 当前路径是否正确。
+3. 失败主要来自目标定义、方案路径、执行细节，还是信息不足。
+4. 哪些动作已经低收益，建议停止。
+5. 下一轮最值得尝试的 1 到 2 个方案是什么。
+6. 每个方案的成功条件和失败停点是什么。
+7. 你推荐继续、换路、收口，还是暂停。`,
+        steps: ["暂停继续执行", "汇总失败路径", "判断失败类型", "砍掉低收益动作", "保留下一轮最值得尝试的方案"],
+        acceptance: ["说清失败原因类型", "下一步不是机械重复", "有明确停点"],
+        anti: ["复盘写成情绪总结", "不给下一轮方案", "失败停点不明确"],
+        extra: "请优先指出哪些动作不值得继续做，而不是只给新增动作。"
+      },
+      {
+        id: 10,
+        title: "验收闭环",
+        scenario: "任务接近完成",
+        goal: "证明结果有效，而不是只说已经改了。",
+        tags: ["验收", "测试", "交付"],
+        useWhen: ["修改接近完成", "不想只听“已经改了”", "需要证明结果有效"],
+        avoidWhen: ["还在方案讨论", "实现尚未开始"],
+        inputs: ["本次目标", "已做改动", "关键风险", "可用验证方式"],
+        prompt: `请为这次修改补充验收闭环。
+
+要求：
+1. 先写出明确的验收标准。
+2. 再说明你采用哪些测试或最小验证步骤。
+3. 区分已验证、无法验证、建议后续验证。
+4. 说明这次修改是否只是绕过问题，还是解决根因。
+5. 检查是否引入无关改动或回归风险。
+
+验收标准不要写成空话，要能实际检查。`,
+        steps: ["写验收标准", "运行或说明验证步骤", "对照标准检查结果", "标注未验证项", "输出交付说明"],
+        acceptance: ["每条标准都可检查", "修改与目标一一对应", "未验证项不假装通过", "回归风险被说明"],
+        anti: ["把看起来可以当验证", "验收标准过宽", "为了补测试扩大范围"],
+        extra: "请把“必须通过的验收项”和“可选增强验证”分开列出。"
+      },
+      {
+        id: 11,
+        title: "兜底方案审批",
+        scenario: "不想让它擅自用临时方案",
+        goal: "让临时方案显性化，确认风险和回收方式。",
+        tags: ["兜底", "临时方案", "审批"],
+        useWhen: ["不接受未经确认的临时解", "问题可能有正解和兜底解", "关心方案自然性和可维护性"],
+        avoidWhen: ["紧急止血且已授权临时方案", "任务很小，没有兜底风险"],
+        inputs: ["当前问题", "不能接受的做法", "可接受妥协"],
+        prompt: `如果过程中出现兜底方案，不要直接采用。
+
+请先说明：
+1. 更优正解是什么。
+2. 为什么正解暂时不可行。
+3. 兜底方案具体是什么。
+4. 它的风险、局限和后续回收方式是什么。
+5. 是否有比它更自然、更可维护的替代方案。
+
+在我确认前，不要实施兜底方案。`,
+        steps: ["识别正解", "说明兜底原因", "比较替代方案", "得到确认后实施", "记录回收方式"],
+        acceptance: ["临时方案没有伪装成正解", "风险和回收方式清楚", "用户确认后才执行"],
+        anti: ["所有细节都要求审批", "紧急止血中过度坚持正解", "没有回收方式"],
+        extra: "除非我明确同意，否则不要通过硬编码、静默吞错、跳过校验或放宽测试来制造通过。"
+      }
+    ];
+
+    const baseSections = ["intro", "standard", "index"];
+    const endSections = ["combo", "checklist"];
+    const allSections = [...baseSections, ...recipes.map(r => `recipe-${r.id}`), ...endSections];
+    const checklistItems = [
+      "我是否说明了目标？",
+      "我是否说明了当前模式：诊断、计划、执行、复现、验收、复盘？",
+      "我是否说明了范围和不做项？",
+      "我是否说明了优先级：长期可维护、短期可用、最小改动、风险最低？",
+      "我是否提供了必要上下文？",
+      "我是否说明了输出格式？",
+      "我是否说明了验收方式？",
+      "我是否限制了需要向我确认的问题数量？"
+    ];
+
+    const recipeNav = document.getElementById("recipeNav");
+    const recipeSections = document.getElementById("recipeSections");
+    const scenarioRows = document.getElementById("scenarioRows");
+    const checklistBox = document.getElementById("checklistBox");
+    const mainContent = document.getElementById("mainContent");
+    const sidebar = document.getElementById("sidebar");
+    const toast = document.getElementById("toast");
+    const searchInput = document.getElementById("searchInput");
+    const noResult = document.getElementById("noResult");
+
+    function escapeHtml(text) {
+      return String(text)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function list(items, ordered = false) {
+      const tag = ordered ? "ol" : "ul";
+      return `<${tag}>${items.map(item => `<li>${escapeHtml(item)}</li>`).join("")}</${tag}>`;
+    }
+
+    function renderNav() {
+      recipeNav.innerHTML = recipes.map(r => `
+        <a href="#recipe-${r.id}" class="nav-link recipe-nav-link" data-search="${escapeHtml([r.title, r.scenario, r.goal, ...r.tags].join(' '))}">
+          ${String(r.id).padStart(2, "0")}. ${escapeHtml(r.scenario)}
+          <small>${escapeHtml(r.title)}</small>
+        </a>
+      `).join("");
+    }
+
+    function renderScenarioRows() {
+      scenarioRows.innerHTML = recipes.map(r => `
+        <tr>
+          <td>${escapeHtml(r.scenario)}</td>
+          <td><button data-target="recipe-${r.id}">${escapeHtml(r.title)}</button></td>
+          <td>${escapeHtml(r.goal)}</td>
+        </tr>
+      `).join("");
+    }
+
+    function renderRecipeSections() {
+      recipeSections.innerHTML = recipes.map((r, index) => {
+        const previous = index === 0 ? "index" : `recipe-${recipes[index - 1].id}`;
+        const previousLabel = index === 0 ? "场景索引" : recipes[index - 1].title;
+        const next = index === recipes.length - 1 ? "combo" : `recipe-${recipes[index + 1].id}`;
+        const nextLabel = index === recipes.length - 1 ? "组合菜谱" : recipes[index + 1].title;
+        return `
+          <section id="recipe-${r.id}" class="content-section">
+            <div class="section-title">
+              <h2>菜谱 ${String(r.id).padStart(2, "0")}：${escapeHtml(r.title)}</h2>
+              <p>${escapeHtml(r.goal)}</p>
+              <div class="tag-row" style="justify-content:center;">${r.tags.map(tag => `<span class="tag">${escapeHtml(tag)}</span>`).join("")}</div>
+            </div>
+
+            <div class="recipe-meta">
+              <div class="box"><div class="label good">适用场景</div>${list(r.useWhen)}</div>
+              <div class="box"><div class="label danger">不适用场景</div>${list(r.avoidWhen)}</div>
+              <div class="box"><div class="label">输入清单</div>${list(r.inputs)}</div>
+              <div class="box"><div class="label warn">常见误用</div>${list(r.anti)}</div>
+            </div>
+
+            <div class="code-toggle" data-toggle="prompt-${r.id}">
+              <span>查看可复制提示词</span><span>▶</span>
+            </div>
+            <div class="prompt-panel" id="prompt-${r.id}">
+              <div class="prompt-head">
+                <span>把【占位符】替换成你的具体上下文</span>
+                <button class="copy-btn" data-copy="${r.id}">复制提示词</button>
+              </div>
+              <pre>${escapeHtml(r.prompt)}</pre>
+            </div>
+
+            <div class="recipe-meta">
+              <div class="box"><div class="label">执行步骤</div>${list(r.steps, true)}</div>
+              <div class="box"><div class="label good">验收标准</div>${list(r.acceptance)}</div>
+            </div>
+
+            <div class="card">
+              <h3>可选补充句</h3>
+              <p>${escapeHtml(r.extra)}</p>
+            </div>
+
+            <div class="page-nav">
+              <a href="#${previous}" class="page-nav-btn" data-target="${previous}">← 上一节：${escapeHtml(previousLabel)}</a>
+              <a href="#${next}" class="page-nav-btn" data-target="${next}">下一节：${escapeHtml(nextLabel)} →</a>
+            </div>
+          </section>
+        `;
+      }).join("");
+    }
+
+    function renderChecklist() {
+      const saved = JSON.parse(localStorage.getItem("codexCookbookChecks") || "{}");
+      checklistBox.innerHTML = checklistItems.map((item, index) => `
+        <label class="check-item">
+          <input type="checkbox" data-check="${index}" ${saved[index] ? "checked" : ""}>
+          <span>${escapeHtml(item)}</span>
+        </label>
+      `).join("");
+    }
+
+    function showSection(sectionId) {
+      if (!allSections.includes(sectionId)) sectionId = "intro";
+      document.querySelectorAll(".content-section").forEach(section => {
+        section.style.display = "none";
+      });
+      document.querySelectorAll(".nav-link").forEach(link => {
+        link.classList.remove("active");
+      });
+      const target = document.getElementById(sectionId);
+      const link = document.querySelector(`.nav-link[href="#${sectionId}"]`);
+      if (target) target.style.display = sectionId === "intro" ? "flex" : "block";
+      if (link) link.classList.add("active");
+      if (mainContent) mainContent.scrollTo({ top: 0, behavior: "smooth" });
+      if (window.innerWidth < 900) sidebar.classList.remove("open");
+      history.replaceState(null, "", `#${sectionId}`);
+    }
+
+    function copyPrompt(id) {
+      const recipe = recipes.find(r => r.id === Number(id));
+      if (!recipe) return;
+      navigator.clipboard.writeText(recipe.prompt).then(() => showToast("提示词已复制"), () => {
+        const area = document.createElement("textarea");
+        area.value = recipe.prompt;
+        document.body.appendChild(area);
+        area.select();
+        document.execCommand("copy");
+        area.remove();
+        showToast("提示词已复制");
+      });
+    }
+
+    function showToast(text) {
+      toast.textContent = text;
+      toast.classList.add("show");
+      setTimeout(() => toast.classList.remove("show"), 1400);
+    }
+
+    function applySearch() {
+      const q = searchInput.value.trim().toLowerCase();
+      let visible = 0;
+      document.querySelectorAll(".recipe-nav-link").forEach(link => {
+        const hit = !q || link.dataset.search.toLowerCase().includes(q);
+        link.classList.toggle("hidden-by-search", !hit);
+        if (hit) visible += 1;
+      });
+      noResult.style.display = q && visible === 0 ? "block" : "none";
+    }
+
+    document.addEventListener("click", event => {
+      const nav = event.target.closest(".nav-link, .page-nav-btn, [data-target]");
+      if (nav) {
+        event.preventDefault();
+        const target = nav.dataset.target || nav.getAttribute("href").replace("#", "");
+        showSection(target);
+      }
+
+      const toggle = event.target.closest(".code-toggle");
+      if (toggle) {
+        const panel = document.getElementById(toggle.dataset.toggle);
+        const arrows = toggle.querySelectorAll("span");
+        const isOpen = panel.classList.toggle("open");
+        arrows[0].textContent = isOpen ? "隐藏可复制提示词" : "查看可复制提示词";
+        arrows[1].textContent = isOpen ? "▼" : "▶";
+      }
+
+      const copy = event.target.closest("[data-copy]");
+      if (copy) copyPrompt(copy.dataset.copy);
+
+      const copyGeneral = event.target.closest("[data-copy-general]");
+      if (copyGeneral) {
+        const text = `目标：解决【具体问题】，尽量逼近【目标状态】。
+模式：【先诊断 / 先计划 / 直接推进 / 先复现 / 先验收 / 先复盘】。
+约束：这次只处理【当前范围】，不扩展到【排除范围】；优先【长期可维护 / 短期可用 / 最小改动 / 风险最低】。
+输出：请给出【判断 / 方案 / 修改 / 测试 / 文档 / 决策记录】。
+验证：通过【测试、最小复现、人工验收标准、日志、截图、对比结果】证明有效。
+如果需要我确认，只集中提出最关键的 1 到 3 个问题，并按“问题、选项、利弊、推荐”格式给出。`;
+        navigator.clipboard.writeText(text).then(() => showToast("通用骨架已复制"));
+      }
+    });
+
+    document.getElementById("mobileMenuButton").addEventListener("click", () => {
+      sidebar.classList.toggle("open");
+    });
+
+    searchInput.addEventListener("input", applySearch);
+
+    checklistBox.addEventListener("change", event => {
+      const input = event.target.closest("[data-check]");
+      if (!input) return;
+      const saved = JSON.parse(localStorage.getItem("codexCookbookChecks") || "{}");
+      saved[input.dataset.check] = input.checked;
+      localStorage.setItem("codexCookbookChecks", JSON.stringify(saved));
+    });
+
+    renderNav();
+    renderScenarioRows();
+    renderRecipeSections();
+    renderChecklist();
+
+    const initial = location.hash ? location.hash.replace("#", "") : "intro";
+    showSection(initial);
+  </script>
+</body>
+</html>
